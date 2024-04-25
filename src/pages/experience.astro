@@ -1,0 +1,160 @@
+---
+import BaseHead from '../components/BaseHead.astro';
+import Header from '../components/Header.astro';
+import Footer from '../components/Footer.astro';
+import { SITE_TITLE, SITE_DESCRIPTION } from '../consts';
+---
+
+<!doctype html>
+
+<html lang="en">
+	<head>
+		<BaseHead title={SITE_TITLE} description={SITE_DESCRIPTION} />
+	</head>
+	<body>
+		<Header />
+		<main>
+			<h2>👩🏻‍💻 a bit more on what I do</h2>
+			<div id="dict">
+			<p>
+				I've been incredibly lucky to have such wonderful experiences, so no worries to read all of it. 
+				Feel free to jump to any section. 🙃
+			</p>
+				<ul>
+					<li><a href="#edu">Education + Relevant Coursework</a></li>
+					<li><a href="#work">Experiences</a></li>
+					<li><a href="#community">Community Involvement</a></li>
+					<li><a href="#skills">Skills</a></li>
+					<li><a href="#awards">Fellowships & Awards</a></li>
+
+				</ul>
+			</div>
+			<div id="edu">
+				<h4>Education + Relevant Coursework</h4>
+				<p>
+					<b>University of California, Berkeley</b>
+					<br />
+					B.S. in Electrical Engineering and Computer Sciences
+					<br />
+					B.S. in Business Administration
+					<br />
+					Expected Graduation: May 2025
+				</p>
+				<p>
+					Relevant Courswork:
+					<ul>
+						<li>CS 61A: Structure and Interpretation of Computer Programs</li>
+						<li>CS 61B: Data Structures</li>
+						<li>CS 61C: Machine Structures</li>
+						<li>CS 70: Discrete Mathematics and Probability Theory</li>
+						<li>EECS 16A/B: Designing Information Devices and Systems I & II </li>
+						<li>DATA 100: Principles and Techniques of Data Science</li>
+						<li>CS 188: Introduction to Artificial Intelligence</li>
+					</ul>
+
+					<ul>
+						<li>ECON 1: Introduction to Economics</li>
+						<li> UGBA 10: Principles of Business</li>
+						<li> UGBA 100: Business Communications</li>
+						<li> UGBA 102A: Financial Accounting</li>
+						<li> UGBA 102B: Managerial Accounting</li>
+						<li> UGBA 104: Business Analytics</li>
+						<li> UGBA 106: Marketing</li>
+						<li> UGBA 107: The Social, Political, and Ethical Environment of Business</li>
+					</ul>
+
+					<ul>
+						<li>AFRICAM 136L: Criminal Justice and Surveillance in America</li>
+						<li>NWMEDIA 151AC: Transforming Tech: Issues and Interventions in STEM</li>
+						<li>ENGIN 157AC: Engineering, The Environment, and Society</li>
+					</ul>
+				</p>
+			</div>
+			<div id="work">
+				<h4>Experiences</h4>
+				<ul>
+					<b>2024</b> Duolingo, Associate Product Management Intern
+				</ul>
+				<ul>
+					<b>2023-Pres.</b> Rewriting the Code, Latinas de RTC Leader
+				</ul>
+				<ul>
+					<b>2023</b> EY-Parthenon, Software Strategy Group, Summer Associate
+				</ul>
+				<ul>
+					<b>2022 - Pres.</b> University of California, Berkeley, Resident Assistant
+				</ul>
+				<ul>
+					<b>2022 - Pres.</b> University of California, Berkeley, ESPM 198: Environmentalists of Color DeCal Facilitator
+				</ul>
+				<ul>
+					<b>2022 - 2023</b> UC Berkeley College of Engineering, Deep Dive Instructor 
+				</ul>
+				<ul>
+					<b>2022</b> UC Berkeley College of Engineering, Mental Health Peer Advisor
+				</ul>
+				<ul>
+					<b>2022</b> Meta, Software Engineering Intern
+				</ul>
+				<ul>
+					<b>2021 - Pres.</b> Latinx and the Environment Initative, Operations Intern
+				</ul>	
+			</div>
+
+			<div id="community">	
+				<h4>Community Involvement</h4>
+				<ul>
+					<b>2023 - Pres.</b> Hispanic Engineers and Scientists (SHPE) at UC Berkeley, Director of Student Retention
+				</ul>
+				<ul>
+					<b>2021 - 2023</b> Bay Area Environmentally Aware Consulting Network, Vice President of Diversity, Equity, and Inclusion
+				</ul>
+			</div>
+
+			<div id="awards">
+				<h4>Fellowships & Awards</h4>
+				<ul>
+					<b>2023 - Pres.</b> Code2040 Fellow
+				</ul>
+				<ul>
+					<b>2023 - 2024</b> Break Through Tech, AI/ML Fellow
+				</ul>
+				<ul>
+					<b></b>
+				</ul>
+				<ul>
+					<b>2022</b> Bloomberg LP. X NCWIT Grace Hopper Scholar
+				</ul>
+				<ul>
+					<b>2022</b> Expedition EY Scholarship
+				</ul>
+				<ul>
+					<b>2022</b> Bloomberg LP., Tech Lab Fellow
+				</ul>
+				<ul>
+					<b>2022</b> Eugene L. Lawler Prize
+				</ul>
+				<ul>
+					<b>2022</b> The D.E. Shaw Group, Latitude Fellow
+				</ul>
+				<ul>
+					<b>2022</b> ExxonMobil LOFT Fellowship
+				</ul>
+				<ul>
+					<b>2021-2025</b> Regents' and Chancellor's Scholarship @ UC Berkeley
+				</ul>
+				<ul>
+					<b>2020</b> National Hispanic Merit Scholar
+				</ul>
+			</div>
+
+			<div id="skills">
+				<h4>Skills</h4>
+				<b>Programming:</b> Python (pandas, matplotlib, scipy), R, Java, HTML/CSS/Javascript
+				<br />
+				<b>Languages:</b> English, Spanish
+			</div>
+		</main>
+		<Footer />
+	</body>
+</html>

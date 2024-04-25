@@ -1,0 +1,69 @@
+---
+import BaseHead from '../components/BaseHead.astro';
+import Header from '../components/Header.astro';
+import Footer from '../components/Footer.astro';
+import { SITE_TITLE, SITE_DESCRIPTION } from '../consts';
+
+---
+
+<!doctype html>
+<html lang="en">
+	<head>
+		<BaseHead title={SITE_TITLE} description={SITE_DESCRIPTION} />
+	</head>
+	<body>
+		<Header />        
+		<main>            
+            <h2>a few of my favorite things</h2>
+            <p>
+                Thinkers:
+                <ul>
+                    <li><a href="https://www.ruhabenjamin.com/">Ruha Benjamin</a> - African American Studies professor researching technology and race/gender</li>
+                    <li><a href="https://www.dair-institute.org/">Timnit Gebru</a> - computer scientist researching AI ethics, algorithmic bias</li>
+                    <li><a href="https://leahthomas.com/">Lia Thomas</a> - environmental justice advocate surrounding the idea of intersectional environmentalism</li>
+                    <li><a href="https://history.yale.edu/people/elizabeth-hinton">Elizabeth Hinton</a> - History professor researching the persistence of poverty and racial inequalities</li>     
+                    <li><a href="https://shsdavisapes.pbworks.com/f/Omelas.pdf">Ursula K. Le Guin</a> - philosopher and science fiction author commenting on the meaning of utopia</li>
+                    <li><a href="https://www.womenshistory.org/education-resources/biographies/ava-duvernay">Ava DuVernay</a> - filmmaker, entreprenuer, and activist</li>
+                </ul>
+            </p>
+            <p>
+                Music:
+                <ul>
+                    <li><a href="https://open.spotify.com/track/4h5x3XHLVYFJaItKuO2rhy?si=f28e0778e05b4421">Ghost in the Machine</a> - SZA</li>
+                    <li><a href="https://open.spotify.com/track/1A8SxnqRK3qabmuN2qxIpa?si=cd404879ebb34470">Spaceman</a> - The Killers</li>
+                    <li><a href="https://open.spotify.com/track/2oHDJHNondITqbl8xZ9vPn?si=10a1e15529254400">Bigger Than Life</a> - Lil Uzi Vert</li>
+                    <li><a href="https://open.spotify.com/track/2tPcTFiQF9MbVUyjZ3zDhA?si=c60ddf46474040af">Paramedic!</a> - SOB X RBE</li>
+                    <li><a href="https://open.spotify.com/track/7tI8c0zPTCulElXIw9aSbg?si=c840faec50ac4fed">ALASKA</a> - BROCKHAMPTON</li>
+                    <li><a href="https://open.spotify.com/track/5MUvVmyKD6bBY0XDeWZjJJ?si=8119a582a0c246a0">You're Lost</a> - Lil Uzi Vert</li>
+                    <li><a href="https://open.spotify.com/track/2VtgzixdB967bHDNu5A1nh?si=baa0cdd4eb8e4788">Metro Spider</a> - Metro Boomin (featuring Young Thug)</li>
+                    <li><a href="https://open.spotify.com/track/6lKRMylSZMtA7EqPl0pcdI?si=1b43b24acabd471e">Are You Satisifed?</a> - Marina and the Diamonds</li>
+                    <li><a href="https://open.spotify.com/track/0tkBOcK7oRVXQJY97zzSvr?si=a01d29853c214226">Telescope</a> - Cage the Elephant</li>
+                </ul>
+
+            </p>
+            <p>
+                Books:
+                <ul>
+                    <li><a href="https://us.macmillan.com/books/9780374609849/griefisforpeople">Grief is for People</a> - Sloane Crosley</li>
+                    <li><a href="https://markwolynn.com/it-didnt-start-with-you/">It Didn't Start with You: How Inherited Family Trauma Shapes Who We Are and How to End the Cycle</a> - Mark Wolynn</li>
+                    <li><a href="https://carolinecriadoperez.com/book/invisible-women/">Invisible Women: Data Bias in a World Designed for Men</a> - Caroline Criado Perez</li>
+                    <li><a href="https://www.hachettebookgroup.com/titles/prisca-dorcas-mojica-rodriguez/for-brown-girls-with-sharp-edges-and-tender-hearts/9781541674868/?lens=seal-press">For Brown Girls with Sharp Edges and Tender Hearts: A Love Letter to Women of Color</a> -  Prisca Dorcas Mojica Rodríguez</li>
+                    <li><a href="https://www.hachettebookgroup.com/titles/ijeoma-oluo/so-you-want-to-talk-about-race/9781580058827/?lens=seal-press">So You Want to Talk About Race</a> - Ijeoma Oluo</li>
+                    <li><a href="https://milkweed.org/book/the-seed-keeper">The Seed Keeper</a> - Diane Wilson</li>
+                    <li><a href="https://books.google.com/books/about/Techno_Fix.html?id=bHOS4sITc3wC">Techno-Fix: Why Technology Won't Save Us Or the Environment</a> - Joyce & Michael Huesemann</li>
+                </ul>
+
+            </p>
+            <p>
+                Resturants:
+                <ul>
+                    <li><a href="https://www.tamscuisine.com/">Tam's Cuisine of China</a> - Pacifica, CA</li>
+                    <li><a href="https://larusticaseattle.com/">La Rustica</a> - Seattle, WA</li>
+                    <li><a href="https://www.eatsmac.com/">S'MAC</a> - New York, NY</li>
+                    <li><a href="https://www.ikea.com/">Ikea</a> - Anywhere 💖</li>
+                </ul>
+            </p>
+		</main>
+		<Footer />
+	</body>
+</html>

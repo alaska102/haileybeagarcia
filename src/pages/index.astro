@@ -1,0 +1,46 @@
+---
+import BaseHead from '../components/BaseHead.astro';
+import Header from '../components/Header.astro';
+import Footer from '../components/Footer.astro';
+import { SITE_TITLE, SITE_DESCRIPTION } from '../consts';
+---
+
+<!doctype html>
+<html lang="en">
+	<head>
+		<BaseHead title={SITE_TITLE} description={SITE_DESCRIPTION} />
+	</head>
+	<body>
+		<Header />
+		<main>
+			<h1>🧚🏻‍♀️✨ hi there!</h1>
+			<p>
+				Welcome! My name is <b>Hailey Garcia</b>. I'm entering my final year at the University of California, 
+				Berkeley, studying Electrical Engineering and Computer Science and Business Administration through
+				the <a href="https://met.berkeley.edu/">Management, Entrepreneurship, and Technology Program</a>. 
+			</p>
+			<p>
+				I’m from the Bay Area, and growing up, I saw first hand the implications of technology and the 
+				‘Silicon Valley mindset’ on my community. As such, I’m passionate about leveraging technology to 
+				empower marginalized communities, rather than harming them. I’m particularly interested in the intersection
+				of race and the environment and how we can use technology to levy inequalities. 
+			</p>
+			<p>
+				For my past three years at Cal, I've been extremely privileged to explore a few of my interests more in depth, 
+				which you can read more about <a href="/work">here</a>. Some things I'd love to highlight are is my work at 
+				the <a href="https://scecberkeley.wixsite.com/scec"> Students of Color Environmental Collective</a>, where I've taught
+				the ESPM 198: Environmentalists of Color <a href="https://scecberkeley.wixsite.com/scec">DeCal</a> for the past two years.
+				Additionally, I worked as a Software Engineering intern at Meta, a Summer Associate at EY-Parthenon's Software Strategy Group,
+				and I'll be at Duolingo this summer as an Associate Product Management Intern. Although I've had a diverse set of experiences,
+				they've all given me insight into how I can use technology to make a positive impact on the world.
+			</p>
+			<p>
+				Outside of work, I absolutely love to read (check my <a href="/favorites">favorites</a> out!), hiking, and trying out new cafes. 
+			</p>
+			<p>
+				Please feel free to <a href="mailto:haileygarcia@berkeley.edu">reach out</a> if you have any questions or just want to chat!
+			</p>
+		</main>
+		<Footer />
+	</body>
+</html>
