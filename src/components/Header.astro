@@ -18,15 +18,15 @@ import { Icon } from 'astro-icon/components';
 		<div class="social-links">
 			<a href="mailto:haileygarcia@berkeley.edu" target="_blank">
 				<span class="sr-only">Email me</span>
-				<Icon name="mdi:email-edit" width="40", height="40" />
+				<Icon name="mdi:email-edit" />
 			</a>
 			<a href="https://www.linkedin.com/in/haileyg102/" target="_blank">
 				<span class="sr-only">Add me on LinkedIn</span>
-				<Icon name="mdi:linkedin" width="40", height="40" />
+				<Icon name="mdi:linkedin" />
 			</a>
 			<a href="https://github.com/alaska102?tab=repositories" target="_blank">
 				<span class="sr-only">Check out my GitHub</span>
-				<Icon name="mdi:github" width="40", height="40" />
+				<Icon name="mdi:github" />
 			</a>        
 		</div>
 	</nav>
@@ -74,4 +74,9 @@ import { Icon } from 'astro-icon/components';
 	.hails	{
 		padding-right: 6.5em;
 	}
+	[data-icon] {
+		width: 40px;
+		height: 40px;
+	}
+
 </style>
