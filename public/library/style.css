@@ -80,18 +80,7 @@ footer{max-width:1120px;margin:0 auto;padding:18px 20px 30px;font-size:10px;colo
 .profile-name{flex:1}.profile-stats{font:400 11px/1.35 'Lora',Georgia,serif;color:var(--muted);text-align:right}.profile-stats b{font:600 13px 'Fraunces',Georgia,serif;color:var(--ink)}
 .read-stats{display:flex;gap:10px;margin:0 0 16px}.read-stats span{flex:1;max-width:160px;background:var(--paper);border:1px solid var(--line);border-radius:14px;padding:10px 14px;font-size:11px;letter-spacing:.06em;text-transform:uppercase;color:var(--muted)}.read-stats b{display:block;font:600 26px/1.1 'Fraunces',Georgia,serif;color:var(--ink);letter-spacing:0;text-transform:none}
 #view-enter.entering .door-wrap>svg{display:none}
-.doorway{position:relative;width:min(250px,68vw);aspect-ratio:4/5;margin:0 auto 18px;perspective:1000px;border:9px solid var(--ink);border-bottom-width:12px;border-radius:125px 125px 4px 4px;overflow:hidden;background:#3a2530;box-shadow:0 10px 24px rgba(87,31,54,.25)}
-.doorway-room{position:absolute;inset:0;margin:0;border-width:6px;border-top-width:8px;border-radius:0;padding:12px 6px 0;overflow:hidden}
-.doorway-room .shelf{margin-bottom:12px}.doorway-room .shelf-books{gap:4px}.doorway-room .pet-perch{width:22px}.doorway-room .pet-perch.right{right:3px}.doorway-room .pet-perch.left{left:3px}.doorway-room .pet-perch:has(.pet-wide){width:32px}
-.door-panel{position:absolute;inset:0;z-index:5;transform-origin:left center;transform:rotateY(-40deg);transition:transform .85s cubic-bezier(.3,.7,.2,1);
-  background:linear-gradient(90deg,#efb9ad,#f4c6b9 60%,#e9ada3);box-shadow:inset -6px 0 10px rgba(87,31,54,.18)}
-.door-panel::before{content:'';position:absolute;inset:18% 14% 52%;border:2.5px solid rgba(87,31,54,.35);border-radius:60px 60px 4px 4px}
-.door-panel::after{content:'';position:absolute;inset:54% 14% 10%;border:2.5px solid rgba(87,31,54,.35);border-radius:4px}
-.door-panel .knob{position:absolute;right:12%;top:52%;width:12px;height:12px;border-radius:50%;background:var(--gold);border:2px solid var(--ink)}
-.doorway.open .door-panel{transform:rotateY(-108deg)}
-.doorway.shake .door-panel{animation:door-shake .4s}
-@keyframes door-shake{0%,100%{transform:rotateY(-40deg)}25%{transform:rotateY(-30deg) translateX(-3px)}50%{transform:rotateY(-44deg) translateX(3px)}75%{transform:rotateY(-34deg) translateX(-2px)}}
-@media (prefers-reduced-motion:reduce){.door-panel{transition:none}.doorway.shake .door-panel{animation:none}}
-.door-stats{display:flex;justify-content:center;gap:18px;margin:6px 0 4px;color:var(--muted);font-size:12px;letter-spacing:.06em;text-transform:uppercase}.door-stats b{font:600 22px 'Fraunces',Georgia,serif;color:var(--ink);letter-spacing:0;margin-right:4px}
+.door-stats{margin:6px 0 10px;color:var(--ink-soft);font-size:14px}
+.perch-pet{width:110px;margin:0 auto 14px;display:flex;flex-direction:column;align-items:center}.perch-pet .pet{width:64px}.perch-pet .pet-wide{width:88px}.perch-pet .plank{display:block;width:100%;margin:0;border-radius:2px}
 .pet-perch>span[title],.pet-spot>span[title]{display:block;width:100%}.pet-spot>span[title]{display:flex;justify-content:center;align-items:flex-end}
 .avg-star{color:var(--gold)}

@@ -49,30 +49,21 @@ async function showProfiles(){show('enter');$('#view-enter').classList.remove('e
   $('#profile-new').onclick=showNewProfile}
 const backLink='<p style="margin-top:14px"><a href="#" class="door-look" id="profiles-back">← back to profiles</a></p>';
 const wireBack=()=>{$('#profiles-back').onclick=e=>{e.preventDefault();showProfiles()}};
-// Picking a name walks you to that library's door: their shelf through the doorway, the password opens it.
+// Picking a name: their pet on a plank of their wood, their numbers, and the password.
 async function showPassword(id,name){
-  const [ps,cat,ids]=await Promise.all([store.listProfiles(),store.getCatalog(),store.friendBooks(id)]);
-  const p=ps.find(x=>x.id===id)||{name,stats:null},l=cleanLook(p.look);
-  const peek=ids.map(b=>cat[b]&&{...cat[b],id:b}).filter(b=>b?.coverUrl).slice(0,8);
+  const p=(await store.listProfiles()).find(x=>x.id===id)||{name,stats:null},l=cleanLook(p.look),[wood,top]=WOODS[l.wood];
   $('#view-enter').classList.add('entering');
-  $('#enter-body').innerHTML=`<div class="doorway" id="doorway"><div class="bookcase doorway-room" id="door-room"></div><div class="door-panel"><span class="knob"></span></div></div>
-  <p class="section-label" style="margin:0">You're at the door of</p><h1 class="serif">${esc(name)}'s library</h1>
-  ${p.stats?`<p class="door-stats"><span><b>${p.stats.read}</b> read</span><span><b>${p.stats.year}</b> this year</span>${p.stats.avg?`<span><b><span class="avg-star">★</span>${p.stats.avg.toFixed(1)}</b> avg</span>`:''}</p>`:''}
-  <p class="lede">${l.pet.name?`${esc(l.pet.name)} is waiting inside.`:'Come on in.'}</p>
+  const st=p.stats;
+  $('#enter-body').innerHTML=`<div class="perch-pet" style="--wood:${wood};--wood-top:${top}">${petOf(l)}<span class="plank"></span></div>
+  <h1 class="serif">${esc(name)}'s library</h1>
+  ${st?`<p class="door-stats">${st.read} read · ${st.year} this year${st.avg?` · <span class="avg-star">★</span> ${st.avg.toFixed(1)}`:''}</p>`:''}
   ${store.demo?`<p class="where-sub">Demo: the password is the name in lowercase (${esc(name.toLowerCase())}).</p>`:''}
   <form id="pw-form"><input type="hidden" autocomplete="username" value="${esc(name)}"/><input class="door-name" id="pw-in" type="password" placeholder="Password" autocomplete="current-password"/>
-  <div style="margin-top:12px"><button class="btn" id="pw-btn">Open the door</button></div></form><p class="lede" id="enter-err" style="margin-top:10px"></p>${backLink}`;
-  const room=$('#door-room');room.innerHTML=buildCase(peek,l,{every:true});applyLook(room,l);
-  room.querySelectorAll('a').forEach(a=>a.removeAttribute('href'));
+  <div style="margin-top:12px"><button class="btn" id="pw-btn">Come in</button></div></form><p class="lede" id="enter-err" style="margin-top:10px"></p>${backLink}`;
   wireBack();$('#pw-in').focus();
-  const door=$('#doorway');
   const go=async()=>{
-    try{ME=await store.signInProfile(id,$('#pw-in').value)}catch(e){
-      $('#enter-err').textContent=`That's not ${name}'s password. Hailey can reset it for you.`;
-      door.classList.remove('shake');void door.offsetWidth;door.classList.add('shake');return}
-    OWNER=!!ME.owner;$('#enter-err').textContent='';door.classList.add('open');
-    await new Promise(r=>setTimeout(r,matchMedia('(prefers-reduced-motion: reduce)').matches?0:850));
-    $('#view-enter').classList.remove('entering');
+    try{ME=await store.signInProfile(id,$('#pw-in').value)}catch(e){$('#enter-err').textContent=`That's not ${name}'s password. Hailey can reset it for you.`;return}
+    OWNER=!!ME.owner;$('#view-enter').classList.remove('entering');
     await enterLibrary();location.hash='#visit-'+ME.friendId};
   $('#pw-form').onsubmit=e=>{e.preventDefault();go()}}
 function showNewProfile(){
