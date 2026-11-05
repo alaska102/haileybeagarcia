@@ -43,7 +43,7 @@ async function showCodeGate(msg){show('enter');
 async function showProfiles(){show('enter');
   const ps=await store.listProfiles();
   $('#enter-body').innerHTML=`<h1 class="serif">Who's visiting?</h1><p class="lede">Pick your profile, or make one if it's your first time.</p>
-  <div class="profiles">${ps.map(p=>`<button class="profile" data-profile="${esc(p.id)}" data-name="${esc(p.name)}"><span class="dot" style="background:${dotColor(p.name)}">${esc(initials(p.name))}</span>${esc(p.name)}</button>`).join('')}
+  <div class="profiles">${ps.map(p=>`<button class="profile" data-profile="${esc(p.id)}" data-name="${esc(p.name)}"><span class="dot" style="background:${dotColor(p.name)}">${esc(initials(p.name))}</span><span class="profile-name">${esc(p.name)}</span>${p.stats?`<span class="profile-stats"><b>${p.stats.read}</b> read<br><b>${p.stats.year}</b> this year</span>`:''}</button>`).join('')}
   <button class="profile profile-new" id="profile-new"><span class="dot">+</span>New profile</button></div>`;
   document.querySelectorAll('[data-profile]').forEach(b=>b.onclick=()=>showPassword(b.dataset.profile,b.dataset.name));
   $('#profile-new').onclick=showNewProfile}
@@ -249,6 +249,7 @@ async function openVisit(id){
   const petLine=l.pet.name?`${l.pet.name} the ${PET_NAMES[l.pet.kind].toLowerCase()} lives here. `:'';
   $('#visit-title').textContent=mine?'Your shelf.':`${p.name}'s shelf.`;
   $('#visit-sub').textContent=petLine+(p.owner?`Every book ${mine?'you have':'Hailey has'} read.`:`Books ${mine?'you have':p.name+' has'} borrowed or rated: ${list.length}.`);
+  $('#visit-stats').innerHTML=p.stats?`<span><b>${p.stats.read}</b>books read</span><span><b>${p.stats.year}</b>this year</span>`:'';
   $('#visit-edit').hidden=!mine;
   $('#visit-case').innerHTML=buildCase(list,l,{empty:mine?'Borrow or rate a book and it shows up here.':'Nothing here yet.'});
   applyLook($('#visit-case'),l);hydratePhotos();show('visit')}

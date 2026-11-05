@@ -38,6 +38,8 @@ export function readExport(text) {
       isbn,
       year: r['Original Publication Year'] || r['Year Published'] || null,
       pages: +r['Number of Pages'] || null,
+      // Goodreads writes 2026/11/04; empty when she never set it.
+      dateRead: /^\d{4}\/\d{2}\/\d{2}$/.test(r['Date Read'] || '') ? r['Date Read'].replace(/\//g, '-') : null,
       shelf: r['Exclusive Shelf'],
       status: SHELF_STATUS[r['Exclusive Shelf']] || 'none',
       owned: (+r['Owned Copies'] || 0) > 0,

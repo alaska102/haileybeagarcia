@@ -3,7 +3,7 @@
 // State lives in sessionStorage so the add-books page sees the same session; closing the tab forgets it.
 import { randomCode } from './codes.js';
 
-const KEY = 'flib_demo2';
+const KEY = 'flib_demo4';
 const DAY = 86400000;
 const FRIENDS = ['Maya', 'Jess', 'Priya', 'Theo', 'Sam'];
 // Hailey's shelf, then each made-up friend's.
@@ -27,13 +27,13 @@ function seed(list) {
     const id = 'b' + i;
     // Goodreads lists nothing as owned, so the demo puts about one read book in four on the shelf.
     const onShelf = b.onShelf || (b.status === 'read' && i % 4 === 0);
-    books[id] = { title: b.title, author: b.author, isbn: b.isbn, year: b.year, pages: b.pages, coverUrl: b.coverUrl, summary: b.summary, genres: b.genres || [], addedBy: 'Hailey', hasPhoto: false, onShelf, status: b.status,
+    books[id] = { dateRead: b.dateRead || null, title: b.title, author: b.author, isbn: b.isbn, year: b.year, pages: b.pages, coverUrl: b.coverUrl, summary: b.summary, genres: b.genres || [], addedBy: 'Hailey', hasPhoto: false, onShelf, status: b.status,
       createdAt: now - (200 - i) * DAY / 2, ratingSum: 0, ratingCount: 0, stampCount: 0, holderFriendId: null, holderName: null, holderSince: null, currentStampId: null };
     history[id] = []; ratings[id] = {};
     if (b.rating) ratings[id].hailey = { value: b.rating, friendId: 'hailey', name: 'Hailey', updatedAt: now - 30 * DAY };
     if (onShelf && rnd() < 0.6) {
       // A short borrowing history, oldest first; the newest stamp may still be out.
-      let t = now - (40 + rnd() * 140) * DAY, who = null;
+      let t = now - (20 + rnd() * 640) * DAY, who = null;
       const stamps = 1 + Math.floor(rnd() * 3);
       for (let s = 0; s < stamps; s++) {
         let f; do f = 'f' + Math.floor(rnd() * FRIENDS.length); while (f === who);
@@ -46,7 +46,7 @@ function seed(list) {
       Object.assign(books[id], { stampCount: stamps, currentStampId: last.id, holderFriendId: last.friendId, holderName: last.name, holderSince: last.tookAt });
     } else if (b.status === 'read' && rnd() < 0.25) {
       const f = 'f' + Math.floor(rnd() * FRIENDS.length);
-      ratings[id][f] = { value: 2 + Math.floor(rnd() * 4), friendId: f, name: profiles[f].name, updatedAt: now - rnd() * 60 * DAY };
+      ratings[id][f] = { value: 2 + Math.floor(rnd() * 4), friendId: f, name: profiles[f].name, updatedAt: now - rnd() * 600 * DAY };
     }
     for (const r of Object.values(ratings[id])) { books[id].ratingSum += r.value; books[id].ratingCount++; }
   });
@@ -65,11 +65,27 @@ export async function createDemo({ books: url = 'books.json' } = {}) {
   const allStamps = () => Object.values(S.history).flat().sort((a, b) => b.tookAt - a.tookAt);
   const sameCode = c => String(c || '').toUpperCase().replace(/O/g, '0').replace(/[IL]/g, '1').replace(/[^0-9A-Z]/g, '') === S.code.replace(/-/g, '');
 
+  // Books read, all time and this year. Hailey's come from Goodreads' Date Read; a friend's
+  // are the books they borrowed or rated, dated by their latest stamp or rating.
+  function stats(p) {
+    const year = new Date().getFullYear();
+    if (p.owner) {
+      const read = Object.values(S.books).filter(b => b.status === 'read');
+      return { read: read.length, year: read.filter(b => (b.dateRead || '').startsWith(year + '-')).length };
+    }
+    let read = 0, thisYear = 0;
+    for (const id of Object.keys(S.books)) {
+      const times = [S.ratings[id]?.[p.friendId]?.updatedAt, ...(S.history[id] || []).filter(s => s.friendId === p.friendId).map(s => s.tookAt)].filter(Boolean);
+      if (!times.length) continue;
+      read++; if (new Date(Math.max(...times)).getFullYear() === year) thisYear++;
+    }
+    return { read, year: thisYear };
+  }
   const store = {
     profiles: true, demo: true,
     // --- the group code, and profiles with passwords ---
     checkCode: async c => sameCode(c),
-    listProfiles: async () => Object.values(S.profiles).map(p => ({ id: p.friendId, name: p.name, owner: p.owner, look: copy(p.look) || null })),
+    listProfiles: async () => Object.values(S.profiles).map(p => ({ id: p.friendId, name: p.name, owner: p.owner, look: copy(p.look) || null, stats: stats(p) })),
     async saveLook(look) { if (S.profiles[S.me]) S.profiles[S.me].look = look; save(); },
     // What shows on someone's shelf: Hailey's is everything she has read; a friend's is what they borrowed or rated.
     async friendBooks(id) {

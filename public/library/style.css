@@ -77,3 +77,5 @@ footer{max-width:1120px;margin:0 auto;padding:18px 20px 30px;font-size:10px;colo
 .pick-tile{width:64px;min-height:64px;display:flex;flex-direction:column;align-items:center;justify-content:flex-end;gap:2px;border:2px solid var(--line);border-radius:12px;background:var(--paper);padding:6px 4px;font:10px 'Lora',Georgia,serif;color:var(--ink-soft)}
 .pick-tile .pet,.pick-tile .decor{width:34px}.pick-tile .pet-wide{width:46px}.pick-tile .lights{position:static;width:52px;height:16px}
 .deco-panel input.door-name{max-width:260px}
+.profile-name{flex:1}.profile-stats{font:400 11px/1.35 'Lora',Georgia,serif;color:var(--muted);text-align:right}.profile-stats b{font:600 13px 'Fraunces',Georgia,serif;color:var(--ink)}
+.read-stats{display:flex;gap:10px;margin:0 0 16px}.read-stats span{flex:1;max-width:160px;background:var(--paper);border:1px solid var(--line);border-radius:14px;padding:10px 14px;font-size:11px;letter-spacing:.06em;text-transform:uppercase;color:var(--muted)}.read-stats b{display:block;font:600 26px/1.1 'Fraunces',Georgia,serif;color:var(--ink);letter-spacing:0;text-transform:none}
