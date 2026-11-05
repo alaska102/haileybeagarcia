@@ -3,7 +3,7 @@
 // State lives in sessionStorage so the add-books page sees the same session; closing the tab forgets it.
 import { randomCode } from './codes.js';
 
-const KEY = 'flib_demo4';
+const KEY = 'flib_demo5';
 const DAY = 86400000;
 const FRIENDS = ['Maya', 'Jess', 'Priya', 'Theo', 'Sam'];
 // Hailey's shelf, then each made-up friend's.
@@ -20,8 +20,8 @@ function seed(list) {
   const now = Date.now();
   // A fixed pseudo-random sequence, so every visitor sees the same demo library.
   let n = 7; const rnd = () => (n = (n * 16807) % 2147483647) / 2147483647;
-  const profiles = { hailey: { name: 'Hailey', friendId: 'hailey', owner: true, canAdd: true, password: null, sample: true, joinedAt: now - 90 * DAY, look: LOOKS[0] } };
-  FRIENDS.forEach((name, i) => { profiles['f' + i] = { name, friendId: 'f' + i, owner: false, canAdd: false, password: null, sample: true, joinedAt: now - (80 - i * 9) * DAY, look: LOOKS[i + 1] }; });
+  const profiles = { hailey: { name: 'Hailey', friendId: 'hailey', owner: true, canAdd: true, password: 'hailey', sample: true, joinedAt: now - 90 * DAY, look: LOOKS[0] } };
+  FRIENDS.forEach((name, i) => { profiles['f' + i] = { name, friendId: 'f' + i, owner: false, canAdd: false, password: name.toLowerCase(), sample: true, joinedAt: now - (80 - i * 9) * DAY, look: LOOKS[i + 1] }; });
   const books = {}, history = {}, ratings = {};
   list.forEach((b, i) => {
     const id = 'b' + i;
@@ -99,12 +99,12 @@ export async function createDemo({ books: url = 'books.json' } = {}) {
       S.profiles[id] = { name, friendId: id, owner: false, canAdd: false, password, joinedAt: Date.now() };
       S.me = id; save(); return member(S.profiles[id]);
     },
-    // The made-up friends and Hailey take any password in the demo. After a reset,
+    // Sample profiles' passwords are their names in lowercase. After a reset,
     // the next password typed becomes the new one.
     async signInProfile(id, password) {
       const p = S.profiles[id];
       if (!p || (p.password !== null && p.password !== password)) throw new Error('WRONG_PASSWORD');
-      if (p.password === null && !p.sample) p.password = password;
+      if (p.password === null) p.password = password;
       S.me = id; save(); return member(p);
     },
     async signOut() { S.me = null; save(); },

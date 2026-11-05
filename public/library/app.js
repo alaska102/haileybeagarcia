@@ -40,7 +40,7 @@ async function showCodeGate(msg){show('enter');
   <div style="margin-top:12px"><button class="btn" id="code-btn">Come in</button></div>`;
   $('#code-btn').onclick=async()=>{if(!await store.checkCode($('#code-in').value))return showCodeGate("That code isn't right. Ask Hailey for the invite code.");
     sessionStorage.setItem(PROFILE_OK,'1');showProfiles()}}
-async function showProfiles(){show('enter');
+async function showProfiles(){show('enter');$('#view-enter').classList.remove('entering');
   const ps=await store.listProfiles();
   $('#enter-body').innerHTML=`<h1 class="serif">Who's visiting?</h1><p class="lede">Pick your profile, or make one if it's your first time.</p>
   <div class="profiles">${ps.map(p=>`<button class="profile" data-profile="${esc(p.id)}" data-name="${esc(p.name)}"><span class="dot" style="background:${dotColor(p.name)}">${esc(initials(p.name))}</span><span class="profile-name">${esc(p.name)}</span>${p.stats?`<span class="profile-stats"><b>${p.stats.read}</b> read<br><b>${p.stats.year}</b> this year</span>`:''}</button>`).join('')}
@@ -49,13 +49,31 @@ async function showProfiles(){show('enter');
   $('#profile-new').onclick=showNewProfile}
 const backLink='<p style="margin-top:14px"><a href="#" class="door-look" id="profiles-back">← back to profiles</a></p>';
 const wireBack=()=>{$('#profiles-back').onclick=e=>{e.preventDefault();showProfiles()}};
-function showPassword(id,name){
-  $('#enter-body').innerHTML=`<h1 class="serif">Hi, ${esc(name)}.</h1><p class="lede">Type your password.</p>${store.demo?'<p class="where-sub">Demo: any password works for the sample profiles.</p>':''}
+// Picking a name walks you to that library's door: their shelf through the doorway, the password opens it.
+async function showPassword(id,name){
+  const [ps,cat,ids]=await Promise.all([store.listProfiles(),store.getCatalog(),store.friendBooks(id)]);
+  const p=ps.find(x=>x.id===id)||{name,stats:null},l=cleanLook(p.look);
+  const peek=ids.map(b=>cat[b]&&{...cat[b],id:b}).filter(b=>b?.coverUrl).slice(0,8);
+  $('#view-enter').classList.add('entering');
+  $('#enter-body').innerHTML=`<div class="doorway" id="doorway"><div class="bookcase doorway-room" id="door-room"></div><div class="door-panel"><span class="knob"></span></div></div>
+  <p class="section-label" style="margin:0">You're at the door of</p><h1 class="serif">${esc(name)}'s library</h1>
+  ${p.stats?`<p class="door-stats"><span><b>${p.stats.read}</b> read</span><span><b>${p.stats.year}</b> this year</span></p>`:''}
+  <p class="lede">${l.pet.name?`${esc(l.pet.name)} is waiting inside.`:'Come on in.'}</p>
+  ${store.demo?`<p class="where-sub">Demo: the password is the name in lowercase (${esc(name.toLowerCase())}).</p>`:''}
   <form id="pw-form"><input type="hidden" autocomplete="username" value="${esc(name)}"/><input class="door-name" id="pw-in" type="password" placeholder="Password" autocomplete="current-password"/>
-  <div style="margin-top:12px"><button class="btn" id="pw-btn">Come in</button></div></form><p class="lede" id="enter-err" style="margin-top:10px"></p>${backLink}`;
+  <div style="margin-top:12px"><button class="btn" id="pw-btn">Open the door</button></div></form><p class="lede" id="enter-err" style="margin-top:10px"></p>${backLink}`;
+  const room=$('#door-room');room.innerHTML=buildCase(peek,l,{every:true});applyLook(room,l);
+  room.querySelectorAll('a').forEach(a=>a.removeAttribute('href'));
   wireBack();$('#pw-in').focus();
-  const go=async()=>{try{ME=await store.signInProfile(id,$('#pw-in').value)}catch(e){$('#enter-err').textContent="That password isn't right. Hailey can reset it for you.";return}
-    OWNER=!!ME.owner;enterLibrary()};
+  const door=$('#doorway');
+  const go=async()=>{
+    try{ME=await store.signInProfile(id,$('#pw-in').value)}catch(e){
+      $('#enter-err').textContent=`That's not ${name}'s password. Hailey can reset it for you.`;
+      door.classList.remove('shake');void door.offsetWidth;door.classList.add('shake');return}
+    OWNER=!!ME.owner;$('#enter-err').textContent='';door.classList.add('open');
+    await new Promise(r=>setTimeout(r,matchMedia('(prefers-reduced-motion: reduce)').matches?0:850));
+    $('#view-enter').classList.remove('entering');
+    await enterLibrary();location.hash='#visit-'+ME.friendId};
   $('#pw-form').onsubmit=e=>{e.preventDefault();go()}}
 function showNewProfile(){
   $('#enter-body').innerHTML=`<h1 class="serif">Make your profile.</h1><p class="lede">Your name goes on anything you borrow, next to your rating.</p>
