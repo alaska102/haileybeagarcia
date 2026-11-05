@@ -2,6 +2,7 @@ import config from './config.js';
 import { connect } from './backend.js';
 import { normalizeCode, formatCode } from './codes.js';
 import { readExport, writeExport, enrich, sameBook } from './goodreads.js';
+import { WOODS, WALLS, PETS, PET_COLORS, PET_NAMES, DECOR, DEFAULT_LOOK, cleanLook, petOf, applyLook, lightsSvg } from './shelf-look.js';
 
 const { store, session } = await connect(config);
 if (store.demo) document.body.insertAdjacentHTML('afterbegin', '<div class="demo-flag">Demo · the friends are made up and nothing you do is saved</div>');
@@ -22,8 +23,8 @@ function initials(n){return n.split(/\s+/).map(w=>w[0]).join('').slice(0,2).toUp
 const PALETTE=['#e8b4b8','#b8d4c8','#f2d5a0','#c5b8e0','#a8c8e8','#e8c4a0','#d4b8d0','#b8e0d4'];
 function dotColor(n){let h=0;for(const c of n)h=(h*31+c.charCodeAt(0))>>>0;return PALETTE[h%PALETTE.length]}
 
-let CATALOG={},LENT={},SHELF='shelf',PICK=false,ME=null,OWNER=false;
-const views=['enter','home','book','owner'];
+let CATALOG={},LENT={},SHELF='shelf',PICK=false,ME=null,OWNER=false,LOOK=DEFAULT_LOOK;
+const views=['enter','home','book','owner','decorate','visit'];
 function show(v){views.forEach(x=>{const el=document.getElementById('view-'+x);if(el)el.hidden=x!==v});window.scrollTo(0,0)}
 function showGate(msg){show('enter');$('#enter-body').innerHTML=`<h1 class="serif">Friendship Library.</h1><p class="lede">${msg?esc(msg):'This shelf is invite-only. Ask Hailey for your invite code.'}</p>
   <input class="door-name" id="code-in" placeholder="Invite code" autocomplete="off" autocapitalize="characters" spellcheck="false"/>
@@ -50,23 +51,23 @@ const backLink='<p style="margin-top:14px"><a href="#" class="door-look" id="pro
 const wireBack=()=>{$('#profiles-back').onclick=e=>{e.preventDefault();showProfiles()}};
 function showPassword(id,name){
   $('#enter-body').innerHTML=`<h1 class="serif">Hi, ${esc(name)}.</h1><p class="lede">Type your password.</p>${store.demo?'<p class="where-sub">Demo: any password works for the sample profiles.</p>':''}
-  <input class="door-name" id="pw-in" type="password" placeholder="Password" autocomplete="current-password"/>
-  <div style="margin-top:12px"><button class="btn" id="pw-btn">Come in</button></div><p class="lede" id="enter-err" style="margin-top:10px"></p>${backLink}`;
+  <form id="pw-form"><input type="hidden" autocomplete="username" value="${esc(name)}"/><input class="door-name" id="pw-in" type="password" placeholder="Password" autocomplete="current-password"/>
+  <div style="margin-top:12px"><button class="btn" id="pw-btn">Come in</button></div></form><p class="lede" id="enter-err" style="margin-top:10px"></p>${backLink}`;
   wireBack();$('#pw-in').focus();
   const go=async()=>{try{ME=await store.signInProfile(id,$('#pw-in').value)}catch(e){$('#enter-err').textContent="That password isn't right. Hailey can reset it for you.";return}
     OWNER=!!ME.owner;enterLibrary()};
-  $('#pw-btn').onclick=go;$('#pw-in').onkeydown=e=>{if(e.key==='Enter')go()}}
+  $('#pw-form').onsubmit=e=>{e.preventDefault();go()}}
 function showNewProfile(){
   $('#enter-body').innerHTML=`<h1 class="serif">Make your profile.</h1><p class="lede">Your name goes on anything you borrow, next to your rating.</p>
-  <input class="door-name" id="np-name" placeholder="Your name" maxlength="30"/>
+  <form id="np-form"><input class="door-name" id="np-name" placeholder="Your name" maxlength="30" autocomplete="username"/>
   <input class="door-name" id="np-pw" type="password" placeholder="Choose a password" autocomplete="new-password" style="margin-top:10px"/>
-  <div style="margin-top:12px"><button class="btn" id="np-btn">Make my profile</button></div><p class="lede" id="enter-err" style="margin-top:10px"></p>${backLink}`;
+  <div style="margin-top:12px"><button class="btn" id="np-btn">Make my profile</button></div></form><p class="lede" id="enter-err" style="margin-top:10px"></p>${backLink}`;
   wireBack();
-  $('#np-btn').onclick=async()=>{const n=$('#np-name').value.trim().replace(/\s+/g,' '),pw=$('#np-pw').value;
+  $('#np-form').onsubmit=async e=>{e.preventDefault();const n=$('#np-name').value.trim().replace(/\s+/g,' '),pw=$('#np-pw').value;
     if(!n)return;if(/[<>]/.test(n)){$('#enter-err').textContent='Names cannot contain < or >.';return}
     if(pw.length<4){$('#enter-err').textContent='Passwords need at least 4 characters.';return}
     try{ME=await store.createProfile(n,pw)}catch(e){$('#enter-err').textContent='Someone already has that name. Add an initial?';return}
-    OWNER=false;enterLibrary()}}
+    OWNER=false;await enterLibrary();location.hash='#decorate'}}
 async function bootProfiles(){
   await session.ready();const u=session.user();
   if(u){ME=await store.getMember(u.uid);OWNER=!!ME?.owner;if(ME)return enterLibrary()}
@@ -98,8 +99,10 @@ async function boot(){
   showGate();
 }
 async function enterLibrary(){
+  LOOK=cleanLook(ME?.look);
   showWho();
   await loadWall();
+  renderVisitStrip();
   if(location.hash&&location.hash!=='#home'&&location.hash!=='#'){route();return}
   show('home');
 }
@@ -135,13 +138,19 @@ const mainTitle=t=>String(t||'').split(/:\s/)[0];
 const titleCard=b=>`<span class="cover-card" style="background:${dotColor(b.title)}"><span>${esc(mainTitle(b.title))}</span><small>${esc(b.author||'')}</small></span>`;
 document.addEventListener('error',e=>{const img=e.target;if(img.tagName==='IMG'&&img.closest('.cover')&&!img.dataset.photo){img.replaceWith(Object.assign(document.createElement('span'),{className:'cover-card',innerHTML:`<span>${esc(mainTitle(img.alt))}</span>`,style:`background:${dotColor(img.alt)}`}))}},true);
 
-// Small drawn pets that sit on the shelves. Illustration only.
-const INK='#571f36';
-const PETS=[
-  `<svg class="pet" viewBox="0 0 48 48" aria-hidden="true"><g stroke="${INK}" stroke-width="2.2" stroke-linejoin="round" stroke-linecap="round"><path d="M34 44c7 0 9-6 6-11" fill="none"/><path d="M14 47c-2-10 1-19 10-19s12 9 10 19z" fill="#f4c6b9"/><path d="M15 20l-1-11 7 6h6l7-6-1 11c0 6-4 9-9 9s-9-3-9-9z" fill="#f4c6b9"/><path d="M22.5 23q1.5 1.5 3 0" fill="none"/></g><circle cx="20.5" cy="19" r="1.3" fill="${INK}"/><circle cx="27.5" cy="19" r="1.3" fill="${INK}"/></svg>`,
-  `<svg class="pet pet-wide" viewBox="0 0 60 34" aria-hidden="true"><g stroke="${INK}" stroke-width="2.2" stroke-linejoin="round" stroke-linecap="round"><path d="M52 33c5 0 6-5 2-7" fill="none"/><path d="M8 33c0-10 8-16 20-16h8c10 0 16 6 16 16z" fill="#fff3d9"/><path d="M5 33c-1-7 2-13 6-15l-1-8 6 5h6l6-5-1 8c4 2 6 8 5 15z" fill="#fff3d9"/><path d="M11 25q2 2 4 0M19 25q2 2 4 0" fill="none"/></g></svg>`,
-  `<svg class="pet" viewBox="0 0 48 48" aria-hidden="true"><g stroke="${INK}" stroke-width="2.2" stroke-linejoin="round" stroke-linecap="round"><path d="M33 44c5 0 7-4 7-8" fill="none"/><path d="M15 47c-1-9 2-17 9-17s10 8 9 17z" fill="#e8a9ae"/><path d="M16 21c0-6 4-10 8-10s8 4 8 10-3 9-8 9-8-3-8-9z" fill="#e8a9ae"/><path d="M17 13c-5 1-7 7-4 11l4-2zM31 13c5 1 7 7 4 11l-4-2z" fill="${INK}"/></g><circle cx="20.5" cy="20" r="1.3" fill="${INK}"/><circle cx="27.5" cy="20" r="1.3" fill="${INK}"/><ellipse cx="24" cy="24.5" rx="2" ry="1.4" fill="${INK}"/></svg>`,
-];
+// The pet, then each decoration, takes a spot on every other shelf; fairy lights hang across the top.
+function buildCase(list,look,{empty='Nothing on this shelf yet.',every=false}={}){
+  const n=perRow(),rows=[];
+  for(let i=0;i<list.length;i+=n)rows.push(list.slice(i,i+n));
+  const pet=`<span title="${esc(look.pet.name||PET_NAMES[look.pet.kind])}">${petOf(look)}</span>`;
+  const items=[pet,...look.decor.filter(d=>d!=='lights').map(d=>DECOR[d].svg)];
+  const lights=look.decor.includes('lights')?lightsSvg():'';
+  return lights+(rows.map((row,r)=>{
+    const item=every?items[r%items.length]:rows.length===1?items[0]:r%2===1?items[((r-1)/2)%items.length]:'';
+    const books=row.map(b=>`<a class="cover${PICK?' pick'+(b.onShelf?' picked':''):''}" ${PICK?`data-pick="${esc(b.id)}" href="#"`:`href="#book-${esc(b.id)}"`}>${b.hasPhoto?`<img data-photo="${esc(b.id)}" alt="${esc(b.title)}"/>`:coverOf(b)?`<img src="${esc(coverOf(b))}" alt="${esc(b.title)}" loading="lazy"/>`:titleCard(b)}${b.holderName?`<span class="ribbon">${esc(b.holderName)}</span>`:''}</a>`).join('');
+    const spot=item&&row.length<n?`<span class="pet-spot">${item}</span>`:'';
+    return `<div class="shelf"><div class="shelf-books" style="--n:${n}">${books}${spot}</div>${item&&!spot?`<span class="pet-perch ${(r>>1)%2?'left':'right'}">${item}</span>`:''}<div class="plank"></div></div>`}).join('')
+    ||`<div class="shelf shelf-empty"><p class="lede">${esc(empty)}</p><span class="pet-spot">${items[0]}</span><div class="plank"></div></div>`)}
 const perRow=()=>innerWidth>=1000?6:innerWidth>=700?5:4;
 const SHELVES={shelf:b=>b.onShelf,reading:b=>b.status==='reading',read:b=>b.status==='read'};
 function renderWall(filter=activeFilter(),q=$('#search-in').value){
@@ -151,15 +160,8 @@ function renderWall(filter=activeFilter(),q=$('#search-in').value){
   if(filter)list=list.filter(b=>(b.genres||[]).some(g=>g.toLowerCase()===filter));
   if(q){const s=q.toLowerCase();list=list.filter(b=>(b.title+' '+(b.author||'')+' '+(b.genres||[]).join(' ')).toLowerCase().includes(s))}
   list.sort((a,b)=>(b.addedAt||0)-(a.addedAt||0)||a.title.localeCompare(b.title));
-  const n=perRow(),rows=[];
-  for(let i=0;i<list.length;i+=n)rows.push(list.slice(i,i+n));
-  // A pet on every third shelf, alternating sides; on a short last shelf it takes an empty spot.
-  $('#wall').innerHTML=rows.map((row,r)=>{
-    const pet=r%3===1||(rows.length===1&&r===0)?PETS[Math.floor(r/3)%PETS.length]:'';
-    const books=row.map(b=>`<a class="cover${PICK?' pick'+(b.onShelf?' picked':''):''}" ${PICK?`data-pick="${esc(b.id)}" href="#"`:`href="#book-${esc(b.id)}"`}>${b.hasPhoto?`<img data-photo="${esc(b.id)}" alt="${esc(b.title)}"/>`:coverOf(b)?`<img src="${esc(coverOf(b))}" alt="${esc(b.title)}" loading="lazy"/>`:titleCard(b)}${b.holderName?`<span class="ribbon">${esc(b.holderName)}</span>`:''}</a>`).join('');
-    const spot=pet&&row.length<n?`<span class="pet-spot">${pet}</span>`:'';
-    return `<div class="shelf"><div class="shelf-books" style="--n:${n}">${books}${spot}</div>${pet&&!spot?`<span class="pet-perch ${r%2?'left':'right'}">${pet}</span>`:''}<div class="plank"></div></div>`}).join('')
-    ||`<div class="shelf shelf-empty"><p class="lede">${q||filter?'No books match.':'Nothing on this shelf yet.'}</p><span class="pet-spot">${PETS[1]}</span><div class="plank"></div></div>`;
+  $('#wall').innerHTML=buildCase(list,LOOK,{empty:q||filter?'No books match.':'Nothing on this shelf yet.'});
+  applyLook($('#wall'),LOOK);
   hydratePhotos();
   $('#pick-bar').hidden=!OWNER;$('#pick-btn').textContent=PICK?'Done':'Choose what is on my shelf';$('#pick-help').hidden=!PICK;
   const counts={};all.filter(SHELVES[SHELF]).forEach(b=>(b.genres||[]).forEach(g=>{counts[g]=(counts[g]||0)+1}));
@@ -218,6 +220,8 @@ function route(){const h=(location.hash||'').slice(1);
   if(!ME)return;
   if(h.startsWith('book-')){openBook(h.slice(5));return}
   if(h==='owner'&&OWNER){renderOwner();return}
+  if(h==='decorate'&&store.profiles){showDecorate();return}
+  if(h.startsWith('visit-')&&store.profiles){openVisit(h.slice(6));return}
   if(h==='home'||h===''){renderWall();show('home')}}
 window.addEventListener('hashchange',route);
 // A friend revoked mid-session sees the gate on their next read rather than a dead page.
@@ -230,6 +234,50 @@ document.addEventListener('click',e=>{
   const pk=e.target.closest('[data-pick]');
   if(pk){e.preventDefault();const id=pk.dataset.pick,onShelf=!CATALOG[id].onShelf;CATALOG[id].onShelf=onShelf;pk.classList.toggle('picked',onShelf);store.setShelf(id,{onShelf}).then(()=>{for(const [k,fn] of Object.entries(SHELVES))document.querySelector(`[data-shelf="${k}"] b`).textContent=Object.values(CATALOG).filter(fn).length})}});
 document.addEventListener('input',e=>{if(e.target.id==='search-in')renderWall()});
+
+// --- decorating your shelf, and visiting other people's ---
+async function renderVisitStrip(){
+  if(!store.profiles)return;
+  const ps=(await store.listProfiles()).sort((a,b)=>(b.id===ME.friendId)-(a.id===ME.friendId));
+  $('#visit-wrap').hidden=false;
+  $('#visit-strip').innerHTML=ps.map(p=>{const l=cleanLook(p.look),[wood]=WOODS[l.wood];
+    return `<a class="visit-card" href="#visit-${esc(p.id)}"><span class="mini" style="--wood:${wood};background:${esc(WALLS[l.wall])}">${petOf(l)}</span>${p.id===ME.friendId?'Your shelf':esc(p.name)}${l.pet.name?`<small>with ${esc(l.pet.name)}</small>`:''}</a>`}).join('')}
+async function openVisit(id){
+  const p=(await store.listProfiles()).find(x=>x.id===id);if(!p){location.hash='#home';return}
+  const l=cleanLook(p.look),mine=id===ME.friendId,ids=await store.friendBooks(id);
+  const list=ids.map(b=>CATALOG[b]&&{...CATALOG[b],id:b,holderName:LENT[b]}).filter(Boolean);
+  const petLine=l.pet.name?`${l.pet.name} the ${PET_NAMES[l.pet.kind].toLowerCase()} lives here. `:'';
+  $('#visit-title').textContent=mine?'Your shelf.':`${p.name}'s shelf.`;
+  $('#visit-sub').textContent=petLine+(p.owner?`Every book ${mine?'you have':'Hailey has'} read.`:`Books ${mine?'you have':p.name+' has'} borrowed or rated: ${list.length}.`);
+  $('#visit-edit').hidden=!mine;
+  $('#visit-case').innerHTML=buildCase(list,l,{empty:mine?'Borrow or rate a book and it shows up here.':'Nothing here yet.'});
+  applyLook($('#visit-case'),l);hydratePhotos();show('visit')}
+let DRAFT=null;
+function showDecorate(){
+  DRAFT=cleanLook(LOOK);
+  $('#deco-title').textContent=ME.look?'Decorate your shelf.':'Make your shelf yours.';
+  $('#deco-cancel').hidden=!ME.look;
+  show('decorate');drawDecorate()}
+function drawDecorate(){
+  const sample=Object.entries(CATALOG).filter(([,b])=>b.coverUrl).slice(0,perRow()*Math.max(2,1+DRAFT.decor.filter(d=>d!=='lights').length)).map(([id,b])=>({...b,id}));
+  $('#deco-preview').innerHTML=buildCase(sample,DRAFT,{every:true});applyLook($('#deco-preview'),DRAFT);
+  $('#deco-preview').querySelectorAll('a').forEach(a=>a.removeAttribute('href'));
+  const on=(c)=>c?' on':'';
+  $('#deco-controls').innerHTML=`<h3>Wood</h3><div class="swatches">${Object.entries(WOODS).map(([k,[w,t]])=>`<button class="swatch${on(DRAFT.wood===k)}" data-wood="${k}" title="${k}" style="background:linear-gradient(${t},${w})"></button>`).join('')}</div>
+  <h3>Wallpaper</h3><div class="swatches">${Object.entries(WALLS).map(([k,w])=>`<button class="swatch${on(DRAFT.wall===k)}" data-wall="${k}" title="${k}" style="background:${esc(w)}"></button>`).join('')}</div>
+  <h3>Pet</h3><div class="swatches">${Object.entries(PETS).map(([k,f])=>`<button class="pick-tile${on(DRAFT.pet.kind===k)}" data-pet="${k}">${f(DRAFT.pet.color)}${PET_NAMES[k]}</button>`).join('')}</div>
+  <h3>Pet color</h3><div class="swatches">${PET_COLORS.map(c=>`<button class="swatch round${on(DRAFT.pet.color===c)}" data-color="${c}" style="background:${c}"></button>`).join('')}</div>
+  <h3>Pet's name</h3><input class="door-name" id="pet-name" maxlength="20" placeholder="Biscuit" value="${esc(DRAFT.pet.name)}"/>
+  <h3>On the shelves <span style="text-transform:none;letter-spacing:0">(up to 4)</span></h3><div class="swatches">${Object.entries(DECOR).map(([k,d])=>`<button class="pick-tile${on(DRAFT.decor.includes(k))}" data-decor="${k}">${k==='lights'?lightsSvg():d.svg}${esc(d.label)}</button>`).join('')}</div>`;
+  $('#pet-name').oninput=e=>{DRAFT.pet.name=e.target.value.slice(0,20)}}
+document.addEventListener('click',async e=>{
+  if($('#view-decorate').hidden)return;
+  const t=e.target.closest('[data-wood],[data-wall],[data-pet],[data-color],[data-decor]');
+  if(t){const d=t.dataset;
+    if(d.wood)DRAFT.wood=d.wood;if(d.wall)DRAFT.wall=d.wall;if(d.pet)DRAFT.pet.kind=d.pet;if(d.color)DRAFT.pet.color=d.color;
+    if(d.decor)DRAFT.decor=DRAFT.decor.includes(d.decor)?DRAFT.decor.filter(x=>x!==d.decor):[...DRAFT.decor,d.decor].slice(-4);
+    drawDecorate();return}
+  if(e.target.id==='deco-save'){LOOK=cleanLook(DRAFT);await store.saveLook(LOOK);ME.look=LOOK;renderVisitStrip();location.hash='#home'}});
 
 // --- owner view (#owner): invite management ---
 const linkFor=(t,scan)=>`${location.origin}${location.pathname.replace(/[^/]*$/,'')}${scan?'scan.html':''}?t=${t}`;

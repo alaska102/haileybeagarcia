@@ -3,16 +3,25 @@
 // State lives in sessionStorage so the add-books page sees the same session; closing the tab forgets it.
 import { randomCode } from './codes.js';
 
-const KEY = 'flib_demo';
+const KEY = 'flib_demo2';
 const DAY = 86400000;
 const FRIENDS = ['Maya', 'Jess', 'Priya', 'Theo', 'Sam'];
+// Hailey's shelf, then each made-up friend's.
+const LOOKS = [
+  { wood: 'pink', wall: 'flowers', pet: { kind: 'sleepy', color: '#fff3d9', name: 'Mochi' }, decor: ['plant', 'lights', 'frame', 'candle'] },
+  { wood: 'oak', wall: 'gingham', pet: { kind: 'bunny', color: '#fff3d9', name: 'Biscuit' }, decor: ['plant', 'books'] },
+  { wood: 'walnut', wall: 'stars', pet: { kind: 'cat', color: '#8f8a99', name: 'Pepper' }, decor: ['lamp', 'globe', 'lights'] },
+  { wood: 'mint', wall: 'dots', pet: { kind: 'frog', color: '#a9d3b5', name: 'Lily' }, decor: ['candle', 'plant'] },
+  { wood: 'white', wall: 'stripes', pet: { kind: 'dog', color: '#e0b070', name: 'Noodle' }, decor: ['frame', 'lamp'] },
+  { wood: 'cherry', wall: 'blush', pet: { kind: 'cat', color: '#e0b070', name: 'Toast' }, decor: ['books'] },
+];
 
 function seed(list) {
   const now = Date.now();
   // A fixed pseudo-random sequence, so every visitor sees the same demo library.
   let n = 7; const rnd = () => (n = (n * 16807) % 2147483647) / 2147483647;
-  const profiles = { hailey: { name: 'Hailey', friendId: 'hailey', owner: true, canAdd: true, password: null, sample: true, joinedAt: now - 90 * DAY } };
-  FRIENDS.forEach((name, i) => { profiles['f' + i] = { name, friendId: 'f' + i, owner: false, canAdd: false, password: null, sample: true, joinedAt: now - (80 - i * 9) * DAY }; });
+  const profiles = { hailey: { name: 'Hailey', friendId: 'hailey', owner: true, canAdd: true, password: null, sample: true, joinedAt: now - 90 * DAY, look: LOOKS[0] } };
+  FRIENDS.forEach((name, i) => { profiles['f' + i] = { name, friendId: 'f' + i, owner: false, canAdd: false, password: null, sample: true, joinedAt: now - (80 - i * 9) * DAY, look: LOOKS[i + 1] }; });
   const books = {}, history = {}, ratings = {};
   list.forEach((b, i) => {
     const id = 'b' + i;
@@ -51,7 +60,7 @@ export async function createDemo({ books: url = 'books.json' } = {}) {
   const save = () => { try { sessionStorage.setItem(KEY, JSON.stringify(S)); } catch (e) {} };
   save();
   const copy = o => o && JSON.parse(JSON.stringify(o));
-  const member = p => p && { name: p.name, friendId: p.friendId, owner: p.owner, canAdd: p.canAdd };
+  const member = p => p && { name: p.name, friendId: p.friendId, owner: p.owner, canAdd: p.canAdd, look: copy(p.look) || null };
   const catalogEntry = b => ({ title: b.title, author: b.author || null, coverUrl: b.coverUrl || null, isbn: b.isbn || null, genres: b.genres || [], hasPhoto: !!b.hasPhoto, onShelf: !!b.onShelf, status: b.status || 'none', addedAt: b.createdAt });
   const allStamps = () => Object.values(S.history).flat().sort((a, b) => b.tookAt - a.tookAt);
   const sameCode = c => String(c || '').toUpperCase().replace(/O/g, '0').replace(/[IL]/g, '1').replace(/[^0-9A-Z]/g, '') === S.code.replace(/-/g, '');
@@ -60,7 +69,14 @@ export async function createDemo({ books: url = 'books.json' } = {}) {
     profiles: true, demo: true,
     // --- the group code, and profiles with passwords ---
     checkCode: async c => sameCode(c),
-    listProfiles: async () => Object.values(S.profiles).map(p => ({ id: p.friendId, name: p.name, owner: p.owner })),
+    listProfiles: async () => Object.values(S.profiles).map(p => ({ id: p.friendId, name: p.name, owner: p.owner, look: copy(p.look) || null })),
+    async saveLook(look) { if (S.profiles[S.me]) S.profiles[S.me].look = look; save(); },
+    // What shows on someone's shelf: Hailey's is everything she has read; a friend's is what they borrowed or rated.
+    async friendBooks(id) {
+      const p = S.profiles[id]; if (!p) return [];
+      if (p.owner) return Object.keys(S.books).filter(b => S.books[b].status === 'read');
+      return Object.keys(S.books).filter(b => S.ratings[b]?.[id] || S.history[b]?.some(s => s.friendId === id));
+    },
     async createProfile(name, password) {
       if (Object.values(S.profiles).some(p => p.name.toLowerCase() === name.toLowerCase())) throw new Error('NAME_TAKEN');
       const id = 'p' + (S.nextId++);
