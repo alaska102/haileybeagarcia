@@ -43,7 +43,7 @@ async function showCodeGate(msg){show('enter');
 async function showProfiles(){show('enter');$('#view-enter').classList.remove('entering');
   const ps=await store.listProfiles();
   $('#enter-body').innerHTML=`<h1 class="serif">Who's visiting?</h1><p class="lede">Pick your profile, or make one if it's your first time.</p>
-  <div class="profiles">${ps.map(p=>`<button class="profile" data-profile="${esc(p.id)}" data-name="${esc(p.name)}"><span class="dot" style="background:${dotColor(p.name)}">${esc(initials(p.name))}</span><span class="profile-name">${esc(p.name)}</span>${p.stats?`<span class="profile-stats"><b>${p.stats.read}</b> read<br><b>${p.stats.year}</b> this year</span>`:''}</button>`).join('')}
+  <div class="profiles">${ps.map(p=>`<button class="profile" data-profile="${esc(p.id)}" data-name="${esc(p.name)}"><span class="dot" style="background:${dotColor(p.name)}">${esc(initials(p.name))}</span><span class="profile-name">${esc(p.name)}</span>${p.stats?`<span class="profile-stats"><b>${p.stats.read}</b> read · <b>${p.stats.year}</b> this year${p.stats.avg?`<br><span class="avg-star">★</span> <b>${p.stats.avg.toFixed(1)}</b> avg`:''}</span>`:''}</button>`).join('')}
   <button class="profile profile-new" id="profile-new"><span class="dot">+</span>New profile</button></div>`;
   document.querySelectorAll('[data-profile]').forEach(b=>b.onclick=()=>showPassword(b.dataset.profile,b.dataset.name));
   $('#profile-new').onclick=showNewProfile}
@@ -57,7 +57,7 @@ async function showPassword(id,name){
   $('#view-enter').classList.add('entering');
   $('#enter-body').innerHTML=`<div class="doorway" id="doorway"><div class="bookcase doorway-room" id="door-room"></div><div class="door-panel"><span class="knob"></span></div></div>
   <p class="section-label" style="margin:0">You're at the door of</p><h1 class="serif">${esc(name)}'s library</h1>
-  ${p.stats?`<p class="door-stats"><span><b>${p.stats.read}</b> read</span><span><b>${p.stats.year}</b> this year</span></p>`:''}
+  ${p.stats?`<p class="door-stats"><span><b>${p.stats.read}</b> read</span><span><b>${p.stats.year}</b> this year</span>${p.stats.avg?`<span><b><span class="avg-star">★</span>${p.stats.avg.toFixed(1)}</b> avg</span>`:''}</p>`:''}
   <p class="lede">${l.pet.name?`${esc(l.pet.name)} is waiting inside.`:'Come on in.'}</p>
   ${store.demo?`<p class="where-sub">Demo: the password is the name in lowercase (${esc(name.toLowerCase())}).</p>`:''}
   <form id="pw-form"><input type="hidden" autocomplete="username" value="${esc(name)}"/><input class="door-name" id="pw-in" type="password" placeholder="Password" autocomplete="current-password"/>
@@ -267,7 +267,7 @@ async function openVisit(id){
   const petLine=l.pet.name?`${l.pet.name} the ${PET_NAMES[l.pet.kind].toLowerCase()} lives here. `:'';
   $('#visit-title').textContent=mine?'Your shelf.':`${p.name}'s shelf.`;
   $('#visit-sub').textContent=petLine+(p.owner?`Every book ${mine?'you have':'Hailey has'} read.`:`Books ${mine?'you have':p.name+' has'} borrowed or rated: ${list.length}.`);
-  $('#visit-stats').innerHTML=p.stats?`<span><b>${p.stats.read}</b>books read</span><span><b>${p.stats.year}</b>this year</span>`:'';
+  $('#visit-stats').innerHTML=p.stats?`<span><b>${p.stats.read}</b>books read</span><span><b>${p.stats.year}</b>this year</span>${p.stats.avg?`<span><b>★ ${p.stats.avg.toFixed(1)}</b>avg rating</span>`:''}`:'';
   $('#visit-edit').hidden=!mine;
   $('#visit-case').innerHTML=buildCase(list,l,{empty:mine?'Borrow or rate a book and it shows up here.':'Nothing here yet.'});
   applyLook($('#visit-case'),l);hydratePhotos();show('visit')}

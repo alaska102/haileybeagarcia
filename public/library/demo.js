@@ -71,7 +71,7 @@ export async function createDemo({ books: url = 'books.json' } = {}) {
     const year = new Date().getFullYear();
     if (p.owner) {
       const read = Object.values(S.books).filter(b => b.status === 'read');
-      return { read: read.length, year: read.filter(b => (b.dateRead || '').startsWith(year + '-')).length };
+      return { read: read.length, year: read.filter(b => (b.dateRead || '').startsWith(year + '-')).length, avg: avgOf(p.friendId) };
     }
     let read = 0, thisYear = 0;
     for (const id of Object.keys(S.books)) {
@@ -79,7 +79,12 @@ export async function createDemo({ books: url = 'books.json' } = {}) {
       if (!times.length) continue;
       read++; if (new Date(Math.max(...times)).getFullYear() === year) thisYear++;
     }
-    return { read, year: thisYear };
+    return { read, year: thisYear, avg: avgOf(p.friendId) };
+  }
+  // Their average star rating across every book they've rated, or null before the first.
+  function avgOf(friendId) {
+    const vs = Object.values(S.ratings).map(r => r[friendId]?.value).filter(Boolean);
+    return vs.length ? Math.round(vs.reduce((a, b) => a + b, 0) / vs.length * 10) / 10 : null;
   }
   const store = {
     profiles: true, demo: true,
