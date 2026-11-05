@@ -1,0 +1,47 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"/><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"/>
+<meta name="robots" content="noindex,nofollow"/>
+<meta name="referrer" content="no-referrer"/>
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' https://unpkg.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src https: data: blob:; media-src blob:; connect-src 'self' https://openlibrary.org https://covers.openlibrary.org; object-src 'none'; base-uri 'none'"/>
+<title>Add books · Friendship Library</title>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,600;0,9..144,700;1,9..144,500;1,9..144,600&family=Lora:ital,wght@0,400;0,600;1,400&family=Cormorant+Garamond:ital,wght@1,500;1,600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css"/>
+<style>
+.scan-wrap{max-width:480px;margin:0 auto;padding:16px 16px calc(32px + env(safe-area-inset-bottom,0px))}
+.scan-wrap h1{margin:4px 0 8px}
+.scan-wrap .btn{min-height:48px;font-size:15px;width:100%}
+.scan-wrap input.door-name{width:100%;box-sizing:border-box;font-size:16px}
+#scan-box{width:100%;border-radius:12px;overflow:hidden;background:#000;margin-bottom:10px}
+#scan-box[hidden]{display:none}
+.scan-row{display:flex;gap:10px;margin-top:10px}.scan-row>*{flex:1;min-width:0}
+.scan-field{display:block;margin-top:12px;font-size:12px;color:var(--muted)}
+.scan-field input{margin-top:4px}
+#pv-img{display:block;width:120px;aspect-ratio:2/3;object-fit:cover;border-radius:6px;margin:0 auto 12px;background:var(--line)}
+#pv-img:not([src]){visibility:hidden;height:0;margin:0}
+.added{padding:8px 0;border-bottom:1px solid var(--line);font-size:14px}
+.scan-msg{min-height:1.4em;margin:10px 0 0}
+</style></head><body>
+<main class="scan-wrap">
+  <section id="s-gate" hidden><h1 class="serif">Add books.</h1><p class="lede">This page opens from its private link. Ask Hailey for one.</p></section>
+  <section id="s-name" hidden><h1 class="serif">Add books.</h1><p class="lede">Your name goes next to the books you add.</p>
+    <input class="door-name" id="scan-name" placeholder="Your name" maxlength="30" autocomplete="name"/>
+    <div style="margin-top:12px"><button class="btn" id="scan-join">Continue</button></div><p class="lede scan-msg" id="join-msg"></p></section>
+  <section id="s-scan" hidden><h1 class="serif">Add books.</h1>
+    <div id="scan-box" hidden></div>
+    <button class="btn" id="cam-btn">Scan a barcode</button>
+    <p class="lede scan-msg" id="scan-msg"></p>
+    <label class="scan-field">Or type the ISBN<input class="door-name" id="isbn-in" inputmode="numeric" placeholder="9780593321201"/></label>
+    <div class="scan-row"><button class="btn ghost" id="isbn-btn">Look it up</button><button class="btn ghost" id="manual-btn">Add by hand</button></div>
+  </section>
+  <section id="s-book" hidden><h1 class="serif" id="pv-head">Is this it?</h1>
+    <img id="pv-img" alt="Book cover"/>
+    <label class="scan-field">Title<input class="door-name" id="pv-title" maxlength="200"/></label>
+    <label class="scan-field">Author<input class="door-name" id="pv-author" maxlength="200"/></label>
+    <label class="scan-field">ISBN<input class="door-name" id="pv-isbn" inputmode="numeric"/></label>
+    <label class="scan-field" id="pv-photo-label">Photo of the cover<input id="pv-photo" type="file" accept="image/*" capture="environment" style="display:block;margin-top:6px"/></label>
+    <p class="lede scan-msg" id="pv-msg"></p>
+    <div class="scan-row"><button class="btn ghost" id="pv-cancel">Cancel</button><button class="btn" id="pv-add">Add to shelf</button></div>
+  </section>
+  <section id="s-log" hidden><p class="section-label">Added just now</p><div id="added-list"></div></section>
+  <p style="text-align:center;margin-top:20px"><a class="door-look" href="./">Back to the shelves</a></p>
+</main>
+<script type="module" src="scan.js"></script></body></html>
